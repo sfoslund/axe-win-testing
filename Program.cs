@@ -1,6 +1,8 @@
 ﻿using Axe.Windows.Automation;
 using Axe.Windows.Automation.Data;
+using Humanizer;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace AxeWinTesting
 {
@@ -8,6 +10,10 @@ namespace AxeWinTesting
     {
         static void Main(string[] args)
         {
+
+            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("cs");
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("cs");
+
             var process = StartTestExe();
 
             try
@@ -17,6 +23,8 @@ namespace AxeWinTesting
                 var scanResults = GetScanResults(scanner);
 
                 PrintScanResults(scanResults);
+
+                PrintControlString();
             }
             finally
             {
@@ -61,6 +69,12 @@ namespace AxeWinTesting
                 }
             }
             Console.WriteLine("===========================================");
+            Console.WriteLine();
+        }
+
+        private static void PrintControlString()
+        {
+            Console.WriteLine("Control string: " + DateTime.UtcNow.Humanize(culture: CultureInfo.CurrentCulture));
         }
     }
 }
