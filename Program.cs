@@ -10,9 +10,9 @@ namespace AxeWinTesting
     {
         static void Main(string[] args)
         {
-
-            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("cs");
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("cs");
+            var langCode = "fr";
+            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture(langCode);
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture(langCode);
 
             var process = StartTestExe();
 
