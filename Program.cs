@@ -1,6 +1,6 @@
 ﻿using Axe.Windows.Automation;
 using Axe.Windows.Automation.Data;
-using Humanizer;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Globalization;
 
@@ -8,23 +8,27 @@ namespace AxeWinTesting
 {
     internal class Program
     {
-        static void Main(string[] args)
+        // Change this code to experiment with differnet languages, for example "es", "it", "ja", "ko"
+        private static string langCode = "fr";
+        // True will show full JSON scan results, false will just show a short example. The long output can
+        // be very long and confusing, since it serializes both content that should be localized (ex: rule
+        // descriptions/ text) and content that should not be localized (ex: property/field names).
+        private static bool showFullResults = false;
+        // Wait time to allow process to start up before beginning scan.
+        private static int processStartupWaitTime = 1000;
+
+        static void Main(string[] _)
         {
-            var langCode = "fr";
+            var process = StartTestExe();
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture(langCode);
             Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture(langCode);
-
-            var process = StartTestExe();
-
             try
             {
                 var scanner = CreateScanner(process.Id);
 
                 var scanResults = GetScanResults(scanner);
 
-                PrintScanResults(scanResults);
-
-                PrintControlString();
+                PrintScanResults(scanResults, showFullResults);
             }
             finally
             {
@@ -36,6 +40,7 @@ namespace AxeWinTesting
         {
             var exePath = "WildlifeManager.exe";
             var process = Process.Start(exePath);
+            Thread.Sleep(processStartupWaitTime);
             return process;
         }
 
@@ -56,25 +61,27 @@ namespace AxeWinTesting
             return scanResults;
         }
 
-        private static void PrintScanResults(ScanOutput scanResults)
+        private static void PrintScanResults(ScanOutput scanResults, bool fullContent)
         {
             Console.WriteLine("Scan results:");
             Console.WriteLine();
             Console.WriteLine("===========================================");
-            foreach (var scanResult in scanResults.WindowScanOutputs)
+            if (fullContent)
             {
-                foreach (var error in scanResult.Errors)
+                Console.WriteLine(JsonConvert.SerializeObject(scanResults, Formatting.Indented));
+            }
+            else
+            {
+                foreach (var scanResult in scanResults.WindowScanOutputs)
                 {
-                    Console.WriteLine(error.Rule.Description);
+                    foreach (var error in scanResult.Errors)
+                    {
+                        Console.WriteLine(error.Rule.Description);
+                    }
                 }
             }
             Console.WriteLine("===========================================");
             Console.WriteLine();
-        }
-
-        private static void PrintControlString()
-        {
-            Console.WriteLine("Control string: " + DateTime.UtcNow.Humanize(culture: CultureInfo.CurrentCulture));
         }
     }
 }
